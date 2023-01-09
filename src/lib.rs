@@ -29,7 +29,7 @@
 //! ```blank
 //! source: |------------------------|
 //! slice:             |-------|
-//! result:            |-------------|
+//! result:              |-----------|
 //! ```
 //! A range of `0..0` would return the same slice.
 //! ```blank

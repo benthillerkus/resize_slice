@@ -29,7 +29,7 @@ A range of `1..` would move the start one to the right and fully expand the end.
 ```blank
 source: |------------------------|
 slice:             |-------|
-result:            |-------------|
+result:              |-----------|
 ```
 A range of `0..0` would return the same slice.
 ```blank

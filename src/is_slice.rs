@@ -51,7 +51,7 @@ impl<T, const N: usize> CouldBeSliceOf<T> for &[T; N] {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     const SOURCE: [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -62,6 +62,7 @@ mod tests {
         let b = &a[1..3];
 
         assert!(b.is_slice_of(a));
+        assert!(!a.is_slice_of(b));
     }
 
     #[test]
@@ -69,6 +70,16 @@ mod tests {
         let a = &SOURCE[..5];
         let b = &SOURCE[5..];
 
+        assert!(!b.is_slice_of(a));
+        assert!(!a.is_slice_of(b));
+    }
+
+    #[test]
+    fn simple_not2() {
+        let a = &SOURCE[..0];
+        let b = &SOURCE[..1];
+
+        assert!(a.is_slice_of(b));
         assert!(!b.is_slice_of(a));
     }
 
@@ -78,6 +89,7 @@ mod tests {
         let b = &a[..5];
 
         assert!(b.is_slice_of(a));
+        assert!(!a.is_slice_of(b));
     }
 
     #[test]
@@ -86,6 +98,7 @@ mod tests {
         let b = &a[5..];
 
         assert!(b.is_slice_of(a));
+        assert!(!a.is_slice_of(b));
     }
 
     #[test]
@@ -94,6 +107,7 @@ mod tests {
         let b = SOURCE.as_ref();
 
         assert!(b.is_slice_of(a));
+        assert!(a.is_slice_of(b));
     }
 
     #[test]
@@ -102,5 +116,6 @@ mod tests {
         let b = &SOURCE[0..0];
 
         assert!(b.is_slice_of(a));
+        assert!(a.is_slice_of(b));
     }
 }

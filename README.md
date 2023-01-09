@@ -1,6 +1,14 @@
-# Resize Slice
+[![license: MIT](https://img.shields.io/crates/l/resize_slice2)](https://github.com/benthillerkus/resize_slice/blob/main/LICENSE)
+[![build status docs](https://img.shields.io/docsrs/resize_slice2)](https://docs.rs/resize_slice2)
+[![crate version](https://img.shields.io/crates/v/resize_slice2)](https://crates.io/crates/resize_slice2)
 
-Shrink or enlarge a slice (given a larger slice) in safe Rust.
+# resize slice (2)
+
+Enlarge and shrink slices (given a larger slice) in safe Rust.
+
+Not to be confused with [resize-slice](https://crates.io/crates/resize_slice), which can only shrink slices and uses `unsafe` 👻
+
+# Example
 
 ```rust
 use resize_slice2::ResizeSlice;

@@ -1,0 +1,13 @@
+[package]
+name = "resize_slice2"
+version = "0.1.0"
+edition = "2021"
+authors = ["Bent Hillerkus"]
+repository = "https://github.com/benthillerkus/resize_slice"
+description = "Resize a slice given a larger slice in safe Rust"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-traits = "0.2.15"

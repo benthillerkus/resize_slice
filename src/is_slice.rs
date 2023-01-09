@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 /// Used to check if a slice is a slice of another slice.
 ///
 /// # Examples
@@ -19,24 +21,32 @@ pub trait CouldBeSliceOf<T> {
 impl<T> CouldBeSliceOf<T> for &[T] {
     #[inline]
     fn is_slice_of(&self, source: &[T]) -> bool {
-        let outer_start = source.as_ptr() as usize;
-        let outer_end = outer_start + source.len() * std::mem::size_of::<T>();
-        let inner_start = self.as_ptr() as usize;
-        let inner_end = inner_start + self.len() * std::mem::size_of::<T>();
+        let Range {
+            start: outer_start,
+            end: outer_end,
+        } = source.as_ptr_range();
+        let Range {
+            start: inner_start,
+            end: inner_end,
+        } = self.as_ptr_range();
 
-        outer_start <= inner_start && inner_end <= outer_end
+        outer_start as usize <= inner_start as usize && inner_end as usize <= outer_end as usize
     }
 }
 
 impl<T, const N: usize> CouldBeSliceOf<T> for &[T; N] {
     #[inline]
     fn is_slice_of(&self, source: &[T]) -> bool {
-        let outer_start = source.as_ptr() as usize;
-        let outer_end = outer_start + source.len() * std::mem::size_of::<T>();
-        let inner_start = self.as_ptr() as usize;
-        let inner_end = inner_start + self.len() * std::mem::size_of::<T>();
+        let Range {
+            start: outer_start,
+            end: outer_end,
+        } = source.as_ptr_range();
+        let Range {
+            start: inner_start,
+            end: inner_end,
+        } = self.as_ptr_range();
 
-        outer_start <= inner_start && inner_end <= outer_end
+        outer_start as usize <= inner_start as usize && inner_end as usize <= outer_end as usize
     }
 }
 

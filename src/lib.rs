@@ -137,6 +137,7 @@ pub trait ResizeSlice<'a, T, R, E> {
 }
 
 impl<'a, T> ResizeSlice<'a, T, RangeFull, Error> for &'a [T] {
+    #[inline(always)]
     fn resize(&self, source: &'a [T], _by: RangeFull) -> &'a [T] {
         source
     }

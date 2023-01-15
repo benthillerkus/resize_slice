@@ -54,7 +54,7 @@ impl<T, const N: usize> CouldBeSliceOf<T> for &[T; N] {
 mod test {
     use super::*;
 
-    const SOURCE: [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    static SOURCE: [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     #[test]
     fn simple() {

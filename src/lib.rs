@@ -1,15 +1,15 @@
 //! [![license: MIT](https://img.shields.io/crates/l/resize_slice2)](https://github.com/benthillerkus/resize_slice/blob/main/LICENSE)
 //! [![build status docs](https://img.shields.io/docsrs/resize_slice2)](https://docs.rs/resize_slice2)
 //! [![crate version](https://img.shields.io/crates/v/resize_slice2)](https://crates.io/crates/resize_slice2)
-//! 
+//!
 //! # resize slice (2)
-//! 
+//!
 //! Enlarge and shrink slices (given a larger slice) in safe Rust.
-//! 
-//! Not to be confused with [resize-slice](https://crates.io/crates/resize_slice), which can only shrink slices and uses `unsafe` 👻
-//! 
+//!
+//! This is done by expressing the new slice as a slice of the source slice -- this way you can also extend the lifetime to the sources lifetime.
+//!
 //! # Example
-//! 
+//!
 //! ```rust
 //! use resize_slice2::ResizeSlice;
 //! let source = &["a", "b", "c", "d", "e", "f"];
@@ -18,7 +18,7 @@
 //! let resized = slice.try_resize(source, 0..1).unwrap();
 //! assert_eq!(resized, &["b", "c", "d", "e"]);
 //! ```
-//! 
+//!
 //! So a range of `1..-1` would move the start one to the right and move the end one to the left.
 //! ```blank
 //! source: |------------------------|
@@ -84,7 +84,7 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {}
 
 /// Allows a slice of `T` to be resized.
-pub trait ResizeSlice<'a, T, R, E> {
+pub trait ResizeSlice<'a, 'source: 'a, T, R, E> {
     /// Resizes the slice using the given range `by`. May panic if the new slice is out of bounds.
     ///
     /// The start of the range is relative to the start of the slice.
@@ -108,7 +108,7 @@ pub trait ResizeSlice<'a, T, R, E> {
     /// self:             |-------|
     /// result:           |-------|
     /// ```
-    fn resize(&self, source: &'a [T], by: R) -> &'a [T];
+    fn resize(&'a self, source: &'source [T], by: R) -> &'source [T];
 
     /// Resizes the slice using the given range `by`.
     ///
@@ -133,16 +133,16 @@ pub trait ResizeSlice<'a, T, R, E> {
     /// self:             |-------|
     /// result:           |-------|
     /// ```
-    fn try_resize(&self, source: &'a [T], by: R) -> Result<&'a [T], E>;
+    fn try_resize(&'a self, source: &'source [T], by: R) -> Result<&'source [T], E>;
 }
 
-impl<'a, T> ResizeSlice<'a, T, RangeFull, Error> for &'a [T] {
+impl<'a, 'source: 'a, T> ResizeSlice<'a, 'source, T, RangeFull, Error> for &'a [T] {
     #[inline(always)]
-    fn resize(&self, source: &'a [T], _by: RangeFull) -> &'a [T] {
+    fn resize(&'a self, source: &'source [T], _by: RangeFull) -> &'source [T] {
         source
     }
 
-    fn try_resize(&self, source: &'a [T], _by: RangeFull) -> Result<&'a [T], Error> {
+    fn try_resize(&'a self, source: &'source [T], _by: RangeFull) -> Result<&'source [T], Error> {
         if self.is_slice_of(source) {
             Ok(source)
         } else {
@@ -151,12 +151,12 @@ impl<'a, T> ResizeSlice<'a, T, RangeFull, Error> for &'a [T] {
     }
 }
 
-impl<'a, T, I> ResizeSlice<'a, T, RangeFrom<I>, Error> for &'a [T]
+impl<'a, 'source: 'a, T, I> ResizeSlice<'a, 'source, T, RangeFrom<I>, Error> for &'a [T]
 where
     I: AsPrimitive<usize> + Copy + Add<Output = I> + PartialOrd,
     usize: AsPrimitive<I>,
 {
-    fn resize(&self, source: &'a [T], by: RangeFrom<I>) -> &'a [T] {
+    fn resize(&'a self, source: &'source [T], by: RangeFrom<I>) -> &'source [T] {
         let self_start =
             (self.as_ptr() as usize - source.as_ptr() as usize) / std::mem::size_of::<T>();
         let new_start = self_start.as_() + by.start;
@@ -164,7 +164,7 @@ where
         &source[new_start.as_()..]
     }
 
-    fn try_resize(&self, source: &'a [T], by: RangeFrom<I>) -> Result<&'a [T], Error> {
+    fn try_resize(&'a self, source: &'source [T], by: RangeFrom<I>) -> Result<&'source [T], Error> {
         if !self.is_slice_of(source) {
             return Err(Error::NotInSource);
         }
@@ -180,12 +180,12 @@ where
     }
 }
 
-impl<'a, T, I> ResizeSlice<'a, T, RangeTo<I>, Error> for &'a [T]
+impl<'a, 'source: 'a, T, I> ResizeSlice<'a, 'source, T, RangeTo<I>, Error> for &'source [T]
 where
     I: AsPrimitive<usize> + Copy + Add<Output = I> + PartialOrd,
     usize: AsPrimitive<I>,
 {
-    fn resize(&self, source: &'a [T], by: RangeTo<I>) -> &'a [T] {
+    fn resize(&'a self, source: &'source [T], by: RangeTo<I>) -> &'source [T] {
         let self_start =
             (self.as_ptr() as usize - source.as_ptr() as usize) / std::mem::size_of::<T>();
         let self_end = self_start + self.len();
@@ -194,7 +194,7 @@ where
         &source[..new_end.as_()]
     }
 
-    fn try_resize(&self, source: &'a [T], by: RangeTo<I>) -> Result<&'a [T], Error> {
+    fn try_resize(&'a self, source: &'source [T], by: RangeTo<I>) -> Result<&'source [T], Error> {
         if !self.is_slice_of(source) {
             return Err(Error::NotInSource);
         }
@@ -211,12 +211,12 @@ where
     }
 }
 
-impl<'a, T, I> ResizeSlice<'a, T, Range<I>, Error> for &'a [T]
+impl<'a, 'source: 'a, T, I> ResizeSlice<'a, 'source, T, Range<I>, Error> for &'a [T]
 where
     I: AsPrimitive<usize> + Copy + Add<Output = I> + PartialOrd,
     usize: AsPrimitive<I>,
 {
-    fn resize(&self, source: &'a [T], by: Range<I>) -> &'a [T] {
+    fn resize(&'a self, source: &'source [T], by: Range<I>) -> &'source [T] {
         let self_start =
             (self.as_ptr() as usize - source.as_ptr() as usize) / std::mem::size_of::<T>();
         let self_end = self_start + self.len();
@@ -226,7 +226,7 @@ where
         &source[new_start.as_()..new_end.as_()]
     }
 
-    fn try_resize(&self, source: &'a [T], by: Range<I>) -> Result<&'a [T], Error> {
+    fn try_resize(&'a self, source: &'source [T], by: Range<I>) -> Result<&'source [T], Error> {
         let self_start =
             (self.as_ptr() as usize - source.as_ptr() as usize) / std::mem::size_of::<T>();
         let self_end = self_start + self.len();

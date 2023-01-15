@@ -6,7 +6,7 @@
 
 Enlarge and shrink slices (given a larger slice) in safe Rust.
 
-Not to be confused with [resize-slice](https://crates.io/crates/resize_slice), which can only shrink slices and uses `unsafe` 👻
+This is done by expressing the new slice as a slice of the source slice -- this way you can also extend the lifetime to the sources lifetime.
 
 # Example
 

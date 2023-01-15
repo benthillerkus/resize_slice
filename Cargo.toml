@@ -1,6 +1,6 @@
 [package]
 name = "resize_slice2"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 authors = ["Bent Hillerkus"]
 repository = "https://github.com/benthillerkus/resize_slice"

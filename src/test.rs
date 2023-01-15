@@ -50,3 +50,24 @@ fn test_not_source_slice_upper() {
     let extended = slice.try_resize(&source, ..);
     assert_eq!(extended, Err(Error::NotInSource));
 }
+
+#[test]
+fn extend_lifetime_compiles() {
+    let source = [1, 2, 3, 4, 5];
+
+    fn explicit_lifetime<'a, 'source, 'result, T>(
+        slice: &'a [T],
+        source: &'source [T],
+    ) -> &'result [T]
+    where
+        'source: 'a + 'result,
+        'result: 'a,
+    {
+        slice.resize(source, ..)
+    }
+
+    assert_eq!(
+        explicit_lifetime(&source[1..3], &source[..]),
+        &[1, 2, 3, 4, 5]
+    );
+}
